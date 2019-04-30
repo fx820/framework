@@ -1,0 +1,45 @@
+server:
+  port: 10000
+spring:
+  devtools:
+    restart:
+      enabled: true
+  datasource:
+    druid: classpath:druid.setting
+  http:
+    encoding:
+      force: true
+  boot:
+    admin:
+      client:
+        prefer-ip: true
+      url: http://localhost:10001
+  redis:
+    host: 127.0.0.1
+    port: 6379
+  activiti:
+    check-process-definitions: false
+  main:
+    allow-bean-definition-overriding: true
+mybatis:
+  type-aliases-package: cn.lrj.entity
+  mapper-locations: classpath*:mapper/*.xml
+  check-config-location: true
+mapper:
+  mappers:
+  - com.realfinance.core.base.web.Mapper
+  - tk.mybatis.mapper.common.Mapper
+  not-empty: true
+  identity: mysql
+# PageHelperConfig 可以替代此方案
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+logging:
+  file: ./logs/slim-log.log
+  level:
+    cn.lrj: debug
+redis:
+  prefix: slim_

@@ -3,6 +3,7 @@ package com.realfinance.core.config;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.setting.Setting;
+import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.support.http.StatViewServlet;
 import com.alibaba.druid.support.http.WebStatFilter;
 import com.alibaba.druid.support.spring.stat.DruidStatInterceptor;
@@ -18,6 +19,7 @@ import org.springframework.web.filter.DelegatingFilterProxy;
 
 import javax.sql.DataSource;
 import java.util.Map;
+import java.util.Properties;
 
 @Configuration
 @Slf4j
@@ -56,18 +58,43 @@ public class DruidConfig {
         return new DruidStatInterceptor();
     }
 
+    /**
+     * 动态数据源,在application -> spring.datasource.druid配置数据源文件路径
+     * @return
+     */
     @Bean(name = "dynamicDataSource")
     @Primary
-    public DynamicDataSource dataSource(DataSource masterDataSource, DataSource slaveDataSource) {
-        if(StrUtil.isBlank(druidSetting)){
-            log.error("druid dataSource setting path is blank,please configure ${spring.datasource.druid}");
-        }
-        Setting setting = new Setting(druidSetting);
-        if (setting.isEmpty()){
-            log.error("druid dataSource setting isEmpty");
-        }
+    public DynamicDataSource dataSource() {
+        Setting setting = loadDataSourcesSetting();
+        Map targetDataSources = createDataSources(setting);
+        return new DynamicDataSource(findDefaultDataSource(targetDataSources), targetDataSources);
+    }
 
-        return new DynamicDataSource(masterDataSource, null);
+    private Setting loadDataSourcesSetting(){
+        if(StrUtil.isBlank(druidSetting)){
+            log.warn("druid dataSource setting path is blank,please configure ${spring.datasource.druid}");
+        }
+        Setting setting = new Setting(druidSetting,true);
+        if (setting.isEmpty()){
+            log.warn("druid dataSource setting isEmpty");
+        }
+        return setting;
+    }
+
+    private Map createDataSources(Setting setting){
+        Map dataSources = MapUtil.newHashMap(true);
+        setting.getGroupedMap().forEach((group,props)->{
+            DruidDataSource druidDataSource = new DruidDataSource();
+            Properties druidProps = new Properties();
+            props.forEach((k,v) -> druidProps.put(StrUtil.addPrefixIfNot(k, "druid."), v));
+            druidDataSource.configFromPropety(druidProps);
+            dataSources.put(group,druidDataSource);
+        });
+        return dataSources;
+    }
+
+    private Object findDefaultDataSource(Map targetDataSources){
+        return targetDataSources.getOrDefault(com.realfinance.core.annotation.DynamicDataSource.DEFAULT_DATA_SOURCE,targetDataSources.values().stream().findFirst().get());
     }
 
 }

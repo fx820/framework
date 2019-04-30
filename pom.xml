@@ -10,6 +10,7 @@
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>slim-core</module>
+        <module>slim-admin</module>
     </modules>
 
     <properties>
@@ -18,9 +19,11 @@
         <druid.version>1.1.10</druid.version>
         <shiro.version>1.4.0</shiro.version>
         <swagger.version>2.7.0</swagger.version>
+        <tk.mybatis.boot.version>2.1.5</tk.mybatis.boot.version>
         <tk.mybatis.version>4.1.5</tk.mybatis.version>
         <mybatis.boot.version>1.3.2</mybatis.boot.version>
         <mysql.version>8.0.11</mysql.version>
+        <pageHelper.version>5.1.8</pageHelper.version>
         <slf4j.version>1.7.9</slf4j.version>
         <junit.version>4.12</junit.version>
         <hutool.version>4.5.7</hutool.version>
@@ -49,7 +52,7 @@
             <dependency>
                 <groupId>com.github.pagehelper</groupId>
                 <artifactId>pagehelper</artifactId>
-                <version>5.1.8</version>
+                <version>${pageHelper.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.quartz-scheduler</groupId>
@@ -115,12 +118,29 @@
             <dependency>
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-swagger2</artifactId>
+                <exclusions>
+                    <exclusion>
+                        <groupId>net.bytebuddy</groupId>
+                        <artifactId>byte-buddy</artifactId>
+                    </exclusion>
+                </exclusions>
                 <version>${swagger.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-swagger-ui</artifactId>
                 <version>${swagger.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>net.bytebuddy</groupId>
+                        <artifactId>byte-buddy</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>tk.mybatis</groupId>
+                <artifactId>mapper-spring-boot-starter</artifactId>
+                <version>${tk.mybatis.boot.version}</version>
             </dependency>
             <dependency>
                 <groupId>tk.mybatis</groupId>
@@ -146,14 +166,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <optional>true</optional>
-        </dependency>
-    </dependencies>
 
     <build>
         <finalName>slim</finalName>
